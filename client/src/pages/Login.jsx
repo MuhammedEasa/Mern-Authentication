@@ -2,11 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LoginStart,LoginToSuccess,LoginFailure } from "../redux/user/userSlice";
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
+  
+  const {loading,error} = useSelector((state)=>state.user)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -15,31 +19,37 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      setLoading(false);
-      if (data.success === false) {
-        toast.error("Error Happened Try Again!", {
-          position: "bottom-center",
+       dispatch(LoginStart());
+       const res = await fetch("/api/auth/login", {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify(formData),
+       });
+       const data = await res.json();
+       if (data.success === false) {
+         dispatch(LoginFailure(data.message));
+         toast.error(data.message|| error, {
+           position: "bottom-center",
+         });
+         return;
+       }
+       dispatch(LoginToSuccess(data));
+       toast.success("Login successful!", {
+         position: "bottom-center",
         });
-
-        return;
-      }
-      navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
     } catch (error) {
-      setLoading(false);
-      toast.error("An error occurred. Please try again.", {
-        position: "top-center",
-      });
+       dispatch(LoginFailure(error));
+       toast.error("An error occurred. Please try again." , {
+         position: "top-center",
+       });
     }
-  };
+   };
+   
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
