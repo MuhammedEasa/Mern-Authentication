@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Link ,useNavigate} from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LoginStart,LoginToSuccess,LoginFailure } from "../redux/user/userSlice";
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
+  const {loading,error} = useSelector((state)=>state.user)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -15,7 +18,7 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      dispatch(LoginStart());
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -24,17 +27,24 @@ export default function SignUp() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      setLoading(false);
       if (data.success === false) {
-        toast.error("Error Happened Try Again!", {
+        dispatch(LoginFailure(data.message));
+        toast.error(data.message|| error, {
           position: "bottom-center",
         });
 
         return;
       }
-      navigate('/login')
+      dispatch(LoginToSuccess(data));
+      toast.success("Account Created Successfully!", {
+        position: "bottom-center",
+       });
+       setTimeout(() => {
+        navigate('/login')
+       }, 3000);
+     
     } catch (error) { 
-      setLoading(false);
+      dispatch(LoginFailure(error));
       toast.error("An error occurred. Please try again.", {
         position: "top-center",
       });
@@ -58,7 +68,7 @@ export default function SignUp() {
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Create an account
-            </h1>
+            </h1> 
             <form
               onSubmit={handleSubmit}
               className="space-y-4 md:space-y-6"
