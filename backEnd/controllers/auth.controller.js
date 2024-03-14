@@ -26,11 +26,11 @@ export const Login = async (req, res, next) => {
     // JWT Token
     const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
     // We dont share Pasword to token
-    const {password:hashedPassword,...rest} = validUser._doc;
+    const { password: hashedPassword, ...rest } = validUser._doc;
     //Cookie  Expires in 1 hour
-    const expiryDate = new Date(Date.now() + 3600000)
+    const expiryDate = new Date(Date.now() + 3600000);
     res
-      .cookie("access_token", token, { httpOnly: true,expires:expiryDate })
+      .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
       .status(200)
       .json(rest);
   } catch (error) {
