@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { LoginStart,LoginToSuccess,LoginFailure } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from 'react-redux'
+import OAuth from "../components/OAuth";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -129,6 +130,7 @@ export default function SignUp() {
                 {" "}
                 {loading ? "Loading..." : "Create an account"}
               </button>
+              <OAuth/>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account?{" "}
                 <Link
