@@ -8,6 +8,7 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase";
 import {
+  SignOut,
   deleteUserFailure,
   deleteUserStart,
   deleteUserSuccess,
@@ -116,7 +117,15 @@ export default function Profile() {
       });
     }
   };
-
+//  Sigout
+const handleSignOut = async ()=>{
+  try {
+    await fetch('api/auth/signOut')
+    dispatch(SignOut())
+  } catch (error) {
+    console.log(error);
+  }
+}
   return (
     <section className="bg-gray-50 dark:bg-gray-900 w-full h-screen  ">
       <div className="p-3 max-w-lg mx-auto">
@@ -185,7 +194,7 @@ export default function Profile() {
           >
             Delete Account
           </span>
-          <span className="text-red-700 cursor-pointer">Signout</span>
+          <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Signout</span>
         </div>
         <ToastContainer />
       </div>
