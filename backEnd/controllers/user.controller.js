@@ -10,7 +10,6 @@ export const test = (req, res) => {
 // Update User
 export const updateUser = async (req, res, next) => {
   if (req.user._id !== req.params.id) {
-    console.log("heu");
     return next(errorHandler(401, "You can Update Only Your Account"));
   }
   try {
@@ -31,6 +30,26 @@ export const updateUser = async (req, res, next) => {
     );
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete User
+export const deleteUser = async (req, res, next) => {
+  if (!req.user._id && !req.user.id) {
+    return next(errorHandler(401, "User ID not found"));
+  }
+
+  const userId = req.user._id || req.user.id;
+
+  if (userId !== req.params.id) {
+    return next(errorHandler(401, "You can only delete your own account"));
+  }
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(204).json("User has been deleted...");
   } catch (error) {
     next(error);
   }

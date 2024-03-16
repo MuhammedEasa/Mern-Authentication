@@ -8,6 +8,9 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase";
 import {
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
@@ -19,7 +22,7 @@ export default function Profile() {
   const [imagePercent, setImagePercent] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [formData, setFormData] = useState({});
-  const { currentUser,loading,error } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -56,6 +59,7 @@ export default function Profile() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+  //  Submit form data to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -70,7 +74,7 @@ export default function Profile() {
       const data = await res.json();
       if (data.success === false) {
         dispatch(updateUserFailure(data));
-        toast.error(data.message|| error, {
+        toast.error(data.message || error, {
           position: "bottom-center",
         });
         return;
@@ -78,9 +82,35 @@ export default function Profile() {
       dispatch(updateUserSuccess(data));
       toast.success("Update Successfull", {
         position: "bottom-center",
-       });
+      });
     } catch (error) {
       dispatch(updateUserFailure(error));
+      toast.error("An error occurred. Please try again.", {
+        position: "top-center",
+      });
+    }
+  };
+  // delete user
+  const handleDeleteAccount = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+
+      if (res.status === 204) {
+        dispatch(deleteUserSuccess());
+        console.log("User has been deleted");
+      } else {
+        const data = await res.json();
+        dispatch(deleteUserFailure(data));
+        toast.error(data.message || "An error occurred", {
+          position: "bottom-center",
+        });
+        console.log("All success");
+      }
+    } catch (error) {
+      dispatch(deleteUserFailure(error));
       toast.error("An error occurred. Please try again.", {
         position: "top-center",
       });
@@ -145,11 +175,16 @@ export default function Profile() {
             onChange={handleChange}
           />
           <button className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-          {loading ? "Loading..." : "Update Profile"}
+            {loading ? "Loading..." : "Update Profile"}
           </button>
         </form>
         <div className="flex justify-between mt-5">
-          <span className="text-red-700 cursor-pointer">Delete Account</span>
+          <span
+            className="text-red-700 cursor-pointer"
+            onClick={handleDeleteAccount}
+          >
+            Delete Account
+          </span>
           <span className="text-red-700 cursor-pointer">Signout</span>
         </div>
         <ToastContainer />
