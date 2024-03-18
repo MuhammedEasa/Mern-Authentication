@@ -13,7 +13,7 @@ export default function CreateUser() {
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios
+    await axios 
       .post("/api/user/createUser", {
         name,
         email,

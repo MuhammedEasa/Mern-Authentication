@@ -9,8 +9,14 @@ export const test = (req, res) => {
 
 // Update User
 export const updateUser = async (req, res, next) => {
-  if (req.user._id !== req.params.id) {
-    return next(errorHandler(401, "You can Update Only Your Account"));
+  if (!req.user._id && !req.user.id) {
+    return next(errorHandler(401, "User ID not found"));
+  }
+
+  const userId = req.user._id || req.user.id;
+
+  if (userId !== req.params.id) {
+    return next(errorHandler(401, "You can only delete your own account"));
   }
   try {
     if (req.body.password) {

@@ -36,7 +36,7 @@ export const Login = async (req, res, next) => {
     
     // JWT Token
     const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
-    // We don't share Password in the token
+    // We don't share Password in the token 
     const { password: hashedPassword, ...rest } = validUser._doc;
     // Cookie Expires in 1 hour
     const expiryDate = new Date(Date.now() + 3600000);
