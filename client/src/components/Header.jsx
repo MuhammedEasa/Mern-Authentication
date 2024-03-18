@@ -22,6 +22,7 @@ export default function Header() {
             )}
           </Link>
         </ul>
+        <Link to={'/admin'}>Admin Dashboard</Link>
       </div>
     </div>
   );

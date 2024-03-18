@@ -54,3 +54,28 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// Admin Page User listing
+
+export const adminUser = async (req, res) => {
+  // Get all users from the database
+  const users = await User.find();
+  res.status(200).json(users);
+};
+
+// Admin Create User
+export const createUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    // Create a new user object
+    const newUser = new User({ username: name, email, password });
+    // Save the user to the database
+    await newUser.save();
+    // Respond with the created user
+    res.status(201).json(newUser);
+  } catch (error) {
+    // If an error occurs, respond with an error status and message
+    console.error("Error creating user:", error);
+    res.status(500).json("Internal server error");
+  }
+};
