@@ -42,7 +42,7 @@ export default function Login() {
         });
         setTimeout(() => {
           navigate("/");
-        }, 3000);
+        }, 2000);
     } catch (error) {
        dispatch(LoginFailure(error));
        toast.error("An error occurred. Please try again." , {

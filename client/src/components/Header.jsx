@@ -13,12 +13,14 @@ const handleSignOut = async ()=>{
   try {
     const response = await fetch('/api/auth/signOut');
       const data = await response.json();
+      localStorage.clear();
       console.log(data);
       toast.success("Logout successful!", {
         position: "bottom-center",
        });
        setTimeout(() => {
          navigate("/login");
+         window.location.reload();
        }, 3000); 
   } catch (error) {
     console.log(error);
