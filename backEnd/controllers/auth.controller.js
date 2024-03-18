@@ -15,19 +15,30 @@ export const signup = async (req, res, next) => {
     next(error);
   }
 };
-// Login P
+// Login Post
 export const Login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const validUser = await User.findOne({ email });
     if (!validUser) return next(errorHandler(404, "User not Found"));
-    const validPassword = bcryptjs.compareSync(password, validUser.password);
+
+    let validPassword = false;
+
+    // Check if the password is stored as plain text
+    if (validUser.password) {
+      validPassword = validUser.password === password;
+    } else {
+      // Check if the password matches the hashed password using bcrypt
+      validPassword = bcryptjs.compareSync(password, validUser.passwordHash);
+    }
+
     if (!validPassword) return next(errorHandler(403, "Wrong Credentials"));
+    
     // JWT Token
     const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
-    // We dont share Pasword to token
+    // We don't share Password in the token
     const { password: hashedPassword, ...rest } = validUser._doc;
-    //Cookie  Expires in 1 hour
+    // Cookie Expires in 1 hour
     const expiryDate = new Date(Date.now() + 3600000);
     res
       .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
@@ -37,7 +48,6 @@ export const Login = async (req, res, next) => {
     next(error);
   }
 };
-
 // Google Auth
 export const google = async (req, res, next) => {
   try {
