@@ -1,7 +1,29 @@
-import { Link } from "react-router-dom";
-import {useSelector} from "react-redux"
+import { Link,useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function Header() {
+  const navigate = useNavigate()
   const {currentUser} = useSelector((state)=>state.user)
+  const isAdmin = () => {
+    return currentUser && currentUser.role === "admin";
+  };
+//  Sigout
+const handleSignOut = async ()=>{
+  try {
+    const response = await fetch('/api/auth/signOut');
+      const data = await response.json();
+      console.log(data);
+      toast.success("Logout successful!", {
+        position: "bottom-center",
+       });
+       setTimeout(() => {
+         navigate("/login");
+       }, 3000); 
+  } catch (error) {
+    console.log(error);
+  }
+}
   return (
     <div className="bg-gray-50 dark:bg-gray-900 text-zinc-100">
       <div className="flex justify-between items-center max-w-7xl mx-auto p-3">
@@ -13,16 +35,23 @@ export default function Header() {
           <Link to={"/"}>
             <li>Home</li>
           </Link>
-          <Link to={"/profile"}>
-            {currentUser ? (
-              <img src={currentUser.profilePicture} alt="profile" className="h-7 w-7 rounded-full object-cover" />
-            ):(
-
-            <li>Login</li>
-            )}
-          </Link>
+          {!isAdmin() && (
+            <Link to={"/profile"}>
+              {currentUser ? (
+                <img src={currentUser.profilePicture} alt="profile" className="h-7 w-7 rounded-full object-cover" />
+              ) : (
+                <li>Login</li>
+              )}
+            </Link>
+          )}
         </ul>
-        <Link to={'/admin'}>Admin Dashboard</Link>
+        {isAdmin() && (
+            <div>
+              <Link to={"/admin"}>Admin Dashboard</Link>
+              <span onClick={handleSignOut} className="text-red-700 cursor-pointer ml-3">Signout</span>
+            </div>
+          )}
+              <ToastContainer />
       </div>
     </div>
   );

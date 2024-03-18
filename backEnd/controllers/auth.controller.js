@@ -19,31 +19,48 @@ export const signup = async (req, res, next) => {
 export const Login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const validUser = await User.findOne({ email });
-    if (!validUser) return next(errorHandler(404, "User not Found"));
+    if (email === "admin@gmail.com" && password === "admin123") {
+      const adminUser = {
+        email: "admin@example.com",
+        role: "admin",
+      };
+      // JWT Token for admin
+      const token = jwt.sign({ _id: adminUser._id }, process.env.JWT_SECRET);
 
-    let validPassword = false;
+      // Omit the password field from the adminUser object
+      const { password: hashedPassword, ...rest } = adminUser;
 
-    // Check if the password is stored as plain text
-    if (validUser.password) {
-      validPassword = validUser.password === password;
+      // Cookie Expires in 1 hour
+      const expiryDate = new Date(Date.now() + 3600000);
+      res
+        .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest); // Send the adminUser object without the password field
     } else {
-      // Check if the password matches the hashed password using bcrypt
-      validPassword = bcryptjs.compareSync(password, validUser.passwordHash);
-    }
+      const validUser = await User.findOne({ email });
+      if (!validUser) return next(errorHandler(404, "User not Found"));
 
-    if (!validPassword) return next(errorHandler(403, "Wrong Credentials"));
-    
-    // JWT Token
-    const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
-    // We don't share Password in the token 
-    const { password: hashedPassword, ...rest } = validUser._doc;
-    // Cookie Expires in 1 hour
-    const expiryDate = new Date(Date.now() + 3600000);
-    res
-      .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
-      .status(200)
-      .json(rest);
+      let validPassword = false;
+
+      if (validUser.password) {
+        validPassword = validUser.password === password;
+      } else {
+        validPassword = bcryptjs.compareSync(password, validUser.passwordHash);
+      }
+
+      if (!validPassword) return next(errorHandler(403, "Wrong Credentials"));
+
+      // JWT Token
+      const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
+      // We don't share Password in the token
+      const { password: hashedPassword, ...rest } = validUser._doc;
+      // Cookie Expires in 1 hour
+      const expiryDate = new Date(Date.now() + 3600000);
+      res
+        .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest);
+    }
   } catch (error) {
     next(error);
   }
@@ -51,48 +68,48 @@ export const Login = async (req, res, next) => {
 // Google Auth
 export const google = async (req, res, next) => {
   try {
-     const user = await User.findOne({ email: req.body.email });
-     if (user) {
-       // JWT Token
-       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-       // We dont share Pasword to token
-       const { password: hashedPassword, ...rest } = user._doc;
-       //Cookie Expires in 1 hour
-       const expiryDate = new Date(Date.now() + 3600000);
-       res
-         .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
-         .status(200)
-         .json(rest);
-     } else {
-       const generatedPassword =
-         Math.random().toString(36).slice(-8) +
-         Math.random().toString(36).slice(-8);
-       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
-       const newUser = new User({
-         username:
-           req.body.name.split(" ").join("").toLowerCase() +
-           Math.random().toString(36).slice(-8),
-         email: req.body.email,
-         password: hashedPassword, 
-         profilePicture: req.body.photo,
-       });
-       await newUser.save();
-       // JWT Token
-       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET); 
-       // We dont share Pasword to token
-       const { password: hashedPassword2, ...rest } = newUser._doc; 
-       //Cookie Expires in 1 hour
-       const expiryDate = new Date(Date.now() + 3600000);
-       res
-         .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
-         .status(200)
-         .json(rest);
-     }
+    const user = await User.findOne({ email: req.body.email });
+    if (user) {
+      // JWT Token
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      // We dont share Pasword to token
+      const { password: hashedPassword, ...rest } = user._doc;
+      //Cookie Expires in 1 hour
+      const expiryDate = new Date(Date.now() + 3600000);
+      res
+        .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest);
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      const newUser = new User({
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(36).slice(-8),
+        email: req.body.email,
+        password: hashedPassword,
+        profilePicture: req.body.photo,
+      });
+      await newUser.save();
+      // JWT Token
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      // We dont share Pasword to token
+      const { password: hashedPassword2, ...rest } = newUser._doc;
+      //Cookie Expires in 1 hour
+      const expiryDate = new Date(Date.now() + 3600000);
+      res
+        .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
+        .status(200)
+        .json(rest);
+    }
   } catch (error) {
-     next(error);
+    next(error);
   }
- };
- 
- export const signOut = (req,res) =>{
-  res.clearCookie('access_token').status(200).json('Signout success!')
- }
+};
+
+export const signOut = (req, res) => {
+  res.clearCookie("access_token").status(200).json("Signout success!");
+};
