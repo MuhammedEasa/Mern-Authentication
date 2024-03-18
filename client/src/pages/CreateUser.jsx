@@ -21,16 +21,22 @@ export default function CreateUser() {
       })
       .then((res) => {
         dispatch(addUser(res.data));
-        toast.success("User Created SuccessFull", {
+        toast.success("User Created Successfully", {
           position: "bottom-center",
         });
         setTimeout(() => {
           navigate("/admin");
         }, 3000);
-        console.log(res);
+      
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        toast.error("An error occurred. Please try again.", {
+          position: "top-center",
+        });
+      });
   };
+  
   return (
     <div className="bg-gray-50 dark:bg-gray-900 text-zinc-100 h-screen flex justify-center items-center">
       <div className="w-96 bg-white rounded-lg shadow-md p-6">

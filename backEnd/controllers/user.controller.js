@@ -79,3 +79,38 @@ export const createUser = async (req, res) => {
     res.status(500).json("Internal server error");
   }
 };
+
+// Admin User Update
+export const adminUpdate = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, email } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username: name, email },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json("Internal server error");
+  }
+};
+
+// Admin  Delete User
+export  const adminDelete = async (req, res)=>{
+  try {
+
+    const id = req.params.id;
+   
+
+    const deletedUser = await User.findByIdAndDelete({_id : id});
+
+    res.status(200).json(deletedUser);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json("Internal server error");
+  }
+}
