@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture:{
     type:String,
-    default:"https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fimages%2Fmale-profile-picture%2F53018621&psig=AOvVaw04jxUOpq47m1PsdFesK862&ust=1710523518289000&source=images&cd=vfe&opi=89978449&ved=0CBMQjRxqFwoTCMjaouii9IQDFQAAAAAdAAAAABAR"
+    default:"https://via.placeholder.com/200"
   }
 }, { timestamps: true });
 
